@@ -74,4 +74,9 @@ So all those codes run again.
 
 #4.6
 - Interpolation
-
+-- change value from other changing value
+--- need same number of range of input and output list
+:  const opacityValue = Y_POSITION.interpolate({
+    inputRange: [-300, 0, 300],
+    outputRange: [1, 0, 1],
+  });
