@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "langAppHmc",
+    "slug": "langAppHmc",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "langAppHmc"
+}
