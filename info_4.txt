@@ -1,0 +1,77 @@
+# 4.1 
+- set up
+ npx create-react-native-app langApp --use-npm
+ 
+ npx react-native run-android
+ npm start
+ 
+ npm install --save styled-components
+ npm install --save-dev babel-plugin-styled-components @types/styled-components @types/styled-components-react-native
+
+# 4.2
+- animation by nature
+-- you can pass function into set function 
+setting plus 5 to the y everytime
+setY((prev) => prev + 5)
+
+
+# 4.3
+- rules of animation
+-- Anything you want to animate, do not put it in the state.
+-- But use it in Animated.Value
+const Y = new Animated.Value(0);
+
+--Never directly set value such as Y = 20
+
+-- Only Animatable components can be Animated
+-- Make it animatable compnent
+--- 2 methods
+1. const Box = styled(Animated.createAnimatedComponent(TouchableOpacity))`
+2. const AnimatedBox = Animated.createAnimatedComponent(Box)   ---> Just wrap this around the component
+
+#4.4
+- First Anmation
+-- timing
+:    Animated.timing(Y, {
+      toValue: 200,
+      useNativeDriver : true  // <---- this is always true
+    }).start();
+
+-- touchableOpacity is not good for animation
+--- make it into view first then wrap it with touchableopacity
+
+-- it does not rerender everytime so to log it use "addListener"
+:Y.addListener(() => console.log(Y));
+
+-- spring
+--- gives us more physics such as bouncing
+:    Animated.spring(Y, {
+      toValue: -200,
+      useNativeDriver: true,
+      bounciness: 35,
+    }).start();
+
+
+#4.5
+- Animation and state
+
+-- start function at the end allows callback function
+
+-- when callback function is called, 
+then if it is changing the state, then it happens rerender
+So all those codes run again.
+
+-- useRef --> persists a value even after rerender happens
+:const Y = useRef(new Animated.Value(0)).current;
+
+-- easing from timing is useful
+:    Animated.timing(Y, {
+      toValue: up ? -100 : 100,
+      useNativeDriver: true,
+      easing: Easing.cubic,
+    }).start(toggleUp);
+
+
+#4.6
+- Interpolation
+
