@@ -80,3 +80,93 @@ So all those codes run again.
     inputRange: [-300, 0, 300],
     outputRange: [1, 0, 1],
   });
+
+
+#4.7
+- Interpolation 2
+
+-- you can use string  such as degree
+
+-- you cannot animate background color if you use native useNativeDriver
+--- you must put nativedirver = false to animate color
+
+-- Animated.valueXY --> use two values
+:  const bottomRight = Animated.timing(POSITION, {
+    toValue: {
+      x: SCREEN_WIDTH / 2 - 100,
+      y: SCREEN_HEIGHT / 2 - 100,
+    },
+    useNativeDriver: false,
+  });
+
+
+:  const POSITION = useRef(new Animated.ValueXY({x:0 , y : 300})).current;
+
+:   const roation = POSITION.y.interpolate({
+    inputRange: [-300, 300],
+    outputRange: ["-360deg", "360deg"],
+  });
+
+# 4.8
+- value xy
+--- list of translateX and translateY can be shotend by "getTranslateTransform"
+            transform: [
+              { rotateY: roation },
+              ...POSITION.getTranslateTransform(),
+            ],
+
+-- "Animated.sequence" array of animation
+:Animated.sequence([topLeft, bottomLeft, bottomRight, topRgiht]).start();
++
+: const topRgiht = Animated.timing(POSITION, { ...
+
+-- Animated.loop => just loost animation
+:     Animated.loop(
+      Animated.sequence([topLeft, bottomLeft, bottomRight, topRgiht]).start()
+    );
+#4.9
+- Pan Responder (dragging)
+-- we can just put it in as attribute , because they are list of json
+: <AnimatedBox
+          {...panResponder.panHandlers}
+
+-- "onStartShouldSetPanResponder" : setting this return true => we want human interaction for the view
+
+-- onPanResponderMove -> tracks position of finger
+:    const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, { dx, dy }) => {
+        POSITION.setValue({
+          x: dx,
+          y: dy,
+        });
+      },
+    })
+  ).current;
+
+
+# 4.10
+- Pan Responder 2
+-- "onPanResponderRelease" : when we release
+:   const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, { dx, dy }) => {
+        POSITION.setValue({
+          x: dx,
+          y: dy,
+        });
+      },
+      onPanResponderRelease: () => {
+        Animated.timing(POSITION, {
+          toValue: {
+            x: 0,
+            y: 0,
+          },
+          useNativeDriver: false,
+          duration: 1000,
+        }).start();
+      },
+    })
+  ).current;
