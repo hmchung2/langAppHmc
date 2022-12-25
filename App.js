@@ -5,86 +5,72 @@ import {
   Pressable,
   TouchableOpacity,
   PanResponder,
+  View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
 
 const Container = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
+  background-color: #00a8ff;
 `;
-const Box = styled.View`
-  background-color: tomato;
-  width: 200px;
-  height: 200px;
+
+const Card = styled(Animated.createAnimatedComponent(View))`
+  background-color: white;
+  width: 300px;
+  height: 300px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
 `;
-const AnimatedBox = Animated.createAnimatedComponent(Box);
+
+const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export default function App() {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
-    Dimensions.get("window");
+  const scale = useRef(new Animated.Value(1)).current;
 
-  const POSITION = useRef(
-    new Animated.ValueXY({
-      x: 0,
-      y: 0,
-    })
-  ).current;
-
-  // console.log("up : ", up);
-  // console.log("y : ", POSITION);
-
-  const rotation = POSITION.y.interpolate({
-    inputRange: [-300, 300],
-    outputRange: ["-360deg", "360deg"],
-  });
-
-  const borderRadius = POSITION.y.interpolate({
-    inputRange: [-300, 300],
-    outputRange: [100, 0],
-  });
-
-  const bgColor = POSITION.y.interpolate({
-    inputRange: [-300, 300],
-    outputRange: ["rgb(255, 99 , 71)", "rgb(71 , 166 , 255)"],
-  });
-
-  // POSITION.addListener(() => console.log(opacityValue));
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        POSITION.setOffset({
-          x: POSITION.x._value,
-          y: POSITION.y._value,
-        });
+      onPanResponderMove: (_, { dx }) => {
+        position.setValue(dx);
       },
-      onPanResponderMove: (_, { dx, dy }) => {
-        POSITION.setValue({
-          x: dx,
-          y: dy,
-        });
-      },
+      onPanResponderGrant: () => onPressIn(),
+
       onPanResponderRelease: () => {
-        POSITION.flattenOffset();
+        Animated.parallel([
+          onPressOut,
+          Animated.spring(position, {
+            toValue: 0,
+            useNativeDriver: true,
+          }),
+        ]).start();
       },
     })
   ).current;
 
+  const position = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => {
+    Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }).start();
+  };
+
+  const onPressOut = Animated.spring(scale, {
+    toValue: 1,
+    useNativeDriver: true,
+  });
+
   return (
     <Container>
-      <Pressable
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      <Card
+        {...panResponder.panHandlers}
+        style={{ transform: [{ scale: scale }, { translateX: position }] }}
       >
-        <AnimatedBox
-          {...panResponder.panHandlers}
-          style={{
-            borderRadius: borderRadius,
-            backgroundColor: bgColor,
-            transform: [...POSITION.getTranslateTransform()],
-          }}
-        />
-      </Pressable>
+        <Ionicons size={98} name="pizza" color="#192a56" />
+      </Card>
     </Container>
   );
 }

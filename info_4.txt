@@ -185,4 +185,4 @@ So all those codes run again.
         POSITION.flattenOffset();
       },
 
-  
+-- "Animated.parallel([])" : run animation functions in parallel in sequence
