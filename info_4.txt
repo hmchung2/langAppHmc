@@ -170,3 +170,19 @@ So all those codes run again.
       },
     })
   ).current;
+
+-- onPanResponderGrant : when the value set to at the start of the touch
+:      onPanResponderGrant: () => {
+        POSITION.setOffset({
+          x: POSITION.x_value,
+          y: POSITION.y_value,
+        });
+      },
+--- POSITION.x is just animated value but not exact number so you need to put "_value"
+
+--- however, more touch will lead to add too many offsets so we need to put "flattenOffset()" in release to empty the offsets
+ :      onPanResponderRelease: () => {
+        POSITION.flattenOffset();
+      },
+
+  

@@ -53,6 +53,12 @@ export default function App() {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        POSITION.setOffset({
+          x: POSITION.x._value,
+          y: POSITION.y._value,
+        });
+      },
       onPanResponderMove: (_, { dx, dy }) => {
         POSITION.setValue({
           x: dx,
@@ -60,14 +66,7 @@ export default function App() {
         });
       },
       onPanResponderRelease: () => {
-        Animated.timing(POSITION, {
-          toValue: {
-            x: 0,
-            y: 0,
-          },
-          useNativeDriver: false,
-          duration: 1000,
-        }).start();
+        POSITION.flattenOffset();
       },
     })
   ).current;
