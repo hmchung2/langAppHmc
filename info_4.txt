@@ -186,3 +186,36 @@ So all those codes run again.
       },
 
 -- "Animated.parallel([])" : run animation functions in parallel in sequence
+
+
+# 4.12-14
+-Card Project
+-- It goes out of range in interpolation by dragging to far
+
+-- to set up boundary use "extrapolate"
+--- options -> "extend" , "identity" , "clamp" 
+
+:  const rotation = position.interpolate({
+    inputRange: [-100, 100],
+    outputRange: ["-15deg", "15deg"],
+    extrapolate: "clamp",
+  });
+
+-- dismiss object when dragged to far
+
+:onPanResponderRelease: (_, { dx }) => {
+        if (dx < -150) {
+          console.log("dismiss to the left");
+          Animated.spring(position, {
+            toValue: -400,
+            useNativeDriver: true,
+          }).start();
+        } else if (dx > 150) {
+          console.log("dismis to the right");
+          Animated.spring(position, {
+            toValue: 400,
+            useNativeDriver: true,
+          }).start();
+        } else {
+          Animated.parallel([onPressOut, goCenter]).start();
+        }
