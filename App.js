@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
+import icons from "./icons";
 
 const Container = styled.View`
   flex: 1;
@@ -44,99 +45,98 @@ const CardContainer = styled.View`
   align-items: center;
 `;
 
-const AnimatedCard = Animated.createAnimatedComponent(Card);
-
 export default function App() {
+  // Values
   const scale = useRef(new Animated.Value(1)).current;
-
-  const position = useRef(new Animated.Value(1)).current;
-
+  const position = useRef(new Animated.Value(0)).current;
   const rotation = position.interpolate({
-    inputRange: [-100, 100],
+    inputRange: [-250, 250],
     outputRange: ["-15deg", "15deg"],
-    extrapolate: "clamp",
   });
-
-  const onPressIn = () => {
-    Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }).start();
-  };
-
   const secondScale = position.interpolate({
-    inputRange: [-250, 0, 250],
-    outputRange: [1, 0.5, 1],
+    inputRange: [-300, 0, 300],
+    outputRange: [1, 0.7, 1],
     extrapolate: "clamp",
   });
-
+  // Animations
   const onPressOut = Animated.spring(scale, {
     toValue: 1,
     useNativeDriver: true,
   });
-
+  const onPressIn = Animated.spring(scale, {
+    toValue: 0.95,
+    useNativeDriver: true,
+  });
   const goCenter = Animated.spring(position, {
     toValue: 0,
     useNativeDriver: true,
   });
-
   const goLeft = Animated.spring(position, {
     toValue: -400,
-    useNativeDriver: true,
     tension: 5,
+    useNativeDriver: true,
+    restDisplacementThreshold: 100,
+    restSpeedThreshold: 100,
   });
-
   const goRight = Animated.spring(position, {
     toValue: 400,
-    useNativeDriver: true,
     tension: 5,
+    useNativeDriver: true,
+    restDisplacementThreshold: 100,
+    restSpeedThreshold: 100,
   });
-
-  const closePress = () => {
-    goLeft.start();
-  };
-
-  const checkPress = () => {
-    goRight.start();
-  };
-
+  // Pan Responders
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, { dx }) => {
         position.setValue(dx);
       },
-      onPanResponderGrant: () => onPressIn(),
-
+      onPanResponderGrant: () => onPressIn.start(),
       onPanResponderRelease: (_, { dx }) => {
-        if (dx < -150) {
-          console.log("dismiss to the left");
-          goLeft.start();
-        } else if (dx > 150) {
-          console.log("dismis to the right");
-          goRight.start();
+        if (dx < -180) {
+          goLeft.start(onDismiss);
+        } else if (dx > 180) {
+          goRight.start(onDismiss);
         } else {
           Animated.parallel([onPressOut, goCenter]).start();
         }
+        // goCenter.start();
       },
     })
   ).current;
+  // State
+  const [index, setIndex] = useState(0);
+  const onDismiss = () => {
+    console.log("dismiss : " + index);
+    scale.setValue(1);
+    position.setValue(0);
+    setIndex((prev) => prev + 1);
+  };
+  const closePress = () => {
+    goLeft.start(onDismiss);
+  };
+  const checkPress = () => {
+    goRight.start(onDismiss);
+  };
 
   return (
     <Container>
       <CardContainer>
         <Card style={{ transform: [{ scale: secondScale }] }}>
-          <Ionicons size={98} name="beer" color="#192a56" />
+          <Ionicons name={icons[index + 1]} color="#192a56" size={98} />
         </Card>
-
         <Card
           {...panResponder.panHandlers}
           style={{
             transform: [
-              { scale: scale },
+              { scale },
               { translateX: position },
               { rotateZ: rotation },
             ],
           }}
         >
-          <Ionicons size={98} name="pizza" color="#192a56" />
+          <Ionicons name={icons[index]} color="#192a56" size={98} />
         </Card>
       </CardContainer>
       <BtnContainer>
