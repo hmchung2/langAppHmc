@@ -188,7 +188,7 @@ So all those codes run again.
 -- "Animated.parallel([])" : run animation functions in parallel in sequence
 
 
-# 4.12-14
+# 4.12-16
 -Card Project
 -- It goes out of range in interpolation by dragging to far
 
@@ -219,3 +219,14 @@ So all those codes run again.
         } else {
           Animated.parallel([onPressOut, goCenter]).start();
         }
+
+-- spring takes long time to finish
+--- use restSpeedThreshold
+
+# 4.17-4.19
+- Drag Drop Project
+
+-- parallel happens at the same time while sequence one after another
+
+
+
