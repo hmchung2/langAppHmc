@@ -229,4 +229,6 @@ So all those codes run again.
 -- parallel happens at the same time while sequence one after another
 
 
+-- interpolate input has to be from small value to big value. The other way around causes an error
 
+-- timing is faster than spring in animation

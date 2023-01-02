@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   PanResponder,
   View,
+  Easing,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
@@ -53,11 +54,26 @@ const Center = styled.View`
   flex: 3;
   justify-content: center;
   align-items: center;
+  z-index: 10;
 `;
 
 export default function App() {
   const scale = useRef(new Animated.Value(1)).current;
   const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  const scaleOne = position.y.interpolate({
+    inputRange: [-300, -80],
+    outputRange: [2, 1],
+    extrapolate: "clamp",
+  });
+
+  const scaleTwo = position.y.interpolate({
+    inputRange: [80, 300],
+    outputRange: [1, 2],
+    extrapolate: "clamp",
+  });
 
   const onPressIn = Animated.spring(scale, {
     toValue: 0.9,
@@ -74,6 +90,20 @@ export default function App() {
     useNativeDriver: true,
   });
 
+  onDropOpacity = Animated.timing(opacity, {
+    toValue: 0,
+    easing: Easing.linear,
+    duration: 100,
+    useNativeDriver: true,
+  });
+
+  const onDropScale = Animated.timing(scale, {
+    toValue: 0,
+    useNativeDriver: true,
+    easing: Easing.linear,
+    duration: 100,
+  });
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -83,17 +113,46 @@ export default function App() {
       onPanResponderGrant: () => {
         onPressIn.start();
       },
-      onPanResponderRelease: () => {
-        Animated.parallel([onPressOut, goHome]).start();
+      onPanResponderRelease: (_, { dy }) => {
+        if (dy < -250 || dy > 250) {
+          // drop
+          Animated.sequence([
+            Animated.parallel([onDropOpacity, onDropScale]),
+            Animated.timing(position, {
+              toValue: 0,
+              useNativeDriver: true,
+              duration: 300,
+              easing: Easing.linear,
+            }),
+          ]).start(nextIcon);
+        } else {
+          Animated.parallel([onPressOut, goHome]).start();
+        }
       },
     })
   ).current;
 
   // Values
+  const [index, setIndex] = useState(0);
+  const nextIcon = () => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+      Animated.spring(opacity, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setIndex((prev) => prev + 1);
+  };
+
   return (
     <Container>
       <Edge>
-        <WordContainer>
+        <WordContainer style={{ transform: [{ scale: scaleOne }] }}>
           <Word color={GREEN}>알어</Word>
         </WordContainer>
       </Edge>
@@ -101,14 +160,15 @@ export default function App() {
         <IconCard
           {...panResponder.panHandlers}
           style={{
+            opacity: opacity,
             transform: [...position.getTranslateTransform(), { scale }],
           }}
         >
-          <Ionicons name="beer" color={GREY} size={76} />
+          <Ionicons name={icons[index]} color={GREY} size={76} />
         </IconCard>
       </Center>
       <Edge>
-        <WordContainer>
+        <WordContainer style={{ transform: [{ scale: scaleTwo }] }}>
           <Word color={RED}>몰라</Word>
         </WordContainer>
       </Edge>
